@@ -7,6 +7,13 @@ import requests
 from bs4 import BeautifulSoup
 
 
+# In[158]:
+
+locationDictionary={}
+categoryDictionary={}
+tagsDictionary={}
+
+
 # In[86]:
 
 dateInput=raw_input("Enter a VALID date in MM-DD-YYYY format. Example: 01-31-2018\t")
@@ -26,7 +33,7 @@ if page.status_code==200:
     soup = BeautifulSoup(page.content, 'html.parser') 
 
 
-# In[147]:
+# In[159]:
 
 def monthToIntMonth(articleMonth):
     switcher = {
@@ -56,11 +63,18 @@ def getSoupArticle(url):
 def getArticleData(soupArticle):
     category=""
     tags=""
-    location=soupArticle.select("p strong.date-line.color-pr")[0].get_text().strip().split(",")[:-2]
+    locList=soupArticle.select("p strong.date-line.color-pr")[0].get_text().strip().split(",")[:-2]
+    location=""
+    for loc in locList:
+        location=(location+str(loc)).lower();
     print location
+    if location in locationDictionary.keys():
+        locationDictionary[location]=+1
+    else:
+        locationDictionary[location]=1
 
 
-# In[148]:
+# In[160]:
 
 divs=soup.select("div.news-item-body")
 # print divs
@@ -88,6 +102,7 @@ for div in divs:
     else:
         break
     
+print locationDictionary
 
 
 # In[ ]:
