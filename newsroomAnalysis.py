@@ -1,24 +1,24 @@
 
 # coding: utf-8
 
-# In[137]:
+# In[79]:
 
 import requests
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
-# %matplotlib inline
 import numpy as np
 import csv
+import os
 
 
-# In[138]:
+# In[3]:
 
 locationDictionary={}
 categoryDictionary={}
 tagsDictionary={}
 
 
-# In[139]:
+# In[4]:
 
 dateInput=raw_input("Enter a VALID date in MM-DD-YYYY format. Example: 01-31-2018\n")
 print(dateInput)
@@ -30,14 +30,14 @@ year=int(dateInput.split("-")[2])
 # print(year)
 
 
-# In[140]:
+# In[5]:
 
 page = requests.get("https://www.newswire.com/newsroom")    
 if page.status_code==200:   
     soup = BeautifulSoup(page.content, 'html.parser') 
 
 
-# In[141]:
+# In[6]:
 
 def monthToIntMonth(articleMonth):
     switcher = {
@@ -100,7 +100,7 @@ def getArticleData(soupArticle):
                 tagsDictionary[tag]=1
 
 
-# In[142]:
+# In[7]:
 
 nextPageTraverse=True
 while(nextPageTraverse):
@@ -143,48 +143,78 @@ while(nextPageTraverse):
         nextPageTraverse=False
     
 
-print locationDictionary
-print "\n\n\n"
-print categoryDictionary
-print "\n\n\n"
-print tagsDictionary
 
+# In[71]:
 
-# In[143]:
-
-fig, ax = plt.subplots(figsize=(50,50))
+print "Printing Location Analysis Graph and Table. The plot has also been saved as a LocationAnalysis.png file locally in the CWD: "+os.getcwd()
+fig, ax = plt.subplots(figsize=(35,12))
 plt.bar(np.arange(len(locationDictionary)), locationDictionary.values(), align='center')
 plt.xticks(np.arange(len(locationDictionary)), locationDictionary.keys(),rotation='vertical', fontsize='12')
+plt.xlabel('Locations')
+plt.ylabel('Number of Articles')
+plt.savefig('LocationAnalysis.png')
+plt.ion()
 plt.show()
-# plt.figure(figsize=(12,9))
 
 
-# In[134]:
+locDict1={}
+maxLen=0
+for k,v in locationDictionary.iteritems():
+    k=k.encode('ascii','ignore')
+    locDict1[k]=v
+    if(maxLen<len(k)):
+        maxLen=len(k)
+    
+print "Location"+' '*(maxLen+2)+"| Number of Article"
+print '-'*(maxLen+32)
+for k,v in locDict1.iteritems():
+    print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
 
-# y=[locationDictionary.keys()]
-# x=[locationDictionary.values()]
-# plt.scatter(y=y,x=range(len(x)),s=x)
-# plt.show()
+
+# In[72]:
+
+print "Printing Category Analysis Graph and Table. The plot has also been saved as a CategoryAnalysis.png file locally in the CWD: "+os.getcwd()
+
+fig, ax = plt.subplots(figsize=(35,12))
+plt.bar(np.arange(len(categoryDictionary)), categoryDictionary.values(), align='center')
+plt.xticks(np.arange(len(categoryDictionary)), categoryDictionary.keys(),rotation='vertical', fontsize='12')
+plt.xlabel('Categories')
+plt.ylabel('Number of Articles')
+plt.savefig('CategoryAnalysis.png')
+# plt.ion()
+plt.show()
+
+maxLen=0
+for k,v in categoryDictionary.iteritems():
+#     k=k.encode('ascii','ignore')
+#     locDict1[k]=v
+    if(maxLen<len(k)):
+        maxLen=len(k)
+
+print "Category"+' '*(maxLen+2)+"| Number of Article"
+print '-'*(maxLen+32)
+for k,v in categoryDictionary.iteritems():
+    print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
+
+
+# In[78]:
+
+print "The Tags are mostly unique for each article and thus plotting a bar graph wouldn't be feasible/readble.We thus only have a table for the same\n\n"
+
+maxLen=0
+for k,v in tagsDictionary.iteritems():
+    if(maxLen<len(k)):
+        maxLen=len(k)
+
+print "Tags"+' '*(maxLen+6)+"| Number of Article"
+print '-'*(maxLen+32)
+for k,v in tagsDictionary.iteritems():
+    print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
 
 
 # In[ ]:
 
-# locDict1={}
-# for k,v in locationDictionary.iteritems():
-#     print "Before", type(k)
-#     k=k.encode('ascii','ignore')
-#     print "After", type(k)
-#     locDict1[k]=v
-# #     try:
-# #         k.encode("ascii")
-# #         locDict1[k]=v
-# #     except:
-# #         print "CAN'T"
 
-# rows=zip(locDict1.keys(),locDict1.values())
-# with open ("loc.csv",'wb') as az:
-#         writer=csv.writer(az)
-#         writer.writerows(rows)
 
 
 # In[ ]:
