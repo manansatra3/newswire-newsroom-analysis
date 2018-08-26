@@ -1,22 +1,22 @@
 
 # coding: utf-8
 
-# In[58]:
+# In[43]:
 
 import requests
 from bs4 import BeautifulSoup
 
 
-# In[59]:
+# In[44]:
 
 locationDictionary={}
 categoryDictionary={}
 tagsDictionary={}
 
 
-# In[60]:
+# In[45]:
 
-dateInput=raw_input("Enter a VALID date in MM-DD-YYYY format. Example: 01-31-2018\n")
+dateInput=raw_input(Enter a VALID date in MM-DD-YYYY format. Example: 01-31-2018\n")
 print(dateInput)
 month=int(dateInput.split("-")[0])
 date=int(dateInput.split("-")[1])
@@ -26,14 +26,14 @@ year=int(dateInput.split("-")[2])
 # print(year)
 
 
-# In[61]:
+# In[46]:
 
 page = requests.get("https://www.newswire.com/newsroom")    
 if page.status_code==200:   
     soup = BeautifulSoup(page.content, 'html.parser') 
 
 
-# In[70]:
+# In[47]:
 
 def monthToIntMonth(articleMonth):
     switcher = {
@@ -96,7 +96,7 @@ def getArticleData(soupArticle):
                 tagsDictionary[tag]=1
 
 
-# In[71]:
+# In[48]:
 
 nextPageTraverse=True
 while(nextPageTraverse):
@@ -119,23 +119,31 @@ while(nextPageTraverse):
                     soupArticle=getSoupArticle(url)
                     getArticleData(soupArticle)
                 else:
+                    nextPageTraverse=False
                     break
             else:
+                nextPageTraverse=False
                 break
         else:
+            nextPageTraverse=False
             break
-        
+    nextPage=soup.select("div.chunkination.chunkination-centered ul")[2]
+    try:
+        nextPage=str(nextPage.find("a")['href'])
+        url="https://www.newswire.com/"+nextPage
+        page = requests.get(url)    
+        if page.status_code==200:   
+            soup = BeautifulSoup(page.content, 'html.parser') 
+    except:
+        print 'No Next Page'
+        nextPageTraverse=False
+    
 
-    print locationDictionary
-    print "\n\n\n"
-    print categoryDictionary
-    print "\n\n\n"
-    print tagsDictionary
-
-
-# In[73]:
-
-
+print locationDictionary
+print "\n\n\n"
+print categoryDictionary
+print "\n\n\n"
+print tagsDictionary
 
 
 # In[ ]:
