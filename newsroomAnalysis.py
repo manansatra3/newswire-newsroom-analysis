@@ -1,22 +1,26 @@
 
 # coding: utf-8
 
-# In[43]:
+# In[137]:
 
 import requests
 from bs4 import BeautifulSoup
+import matplotlib.pyplot as plt
+# %matplotlib inline
+import numpy as np
+import csv
 
 
-# In[44]:
+# In[138]:
 
 locationDictionary={}
 categoryDictionary={}
 tagsDictionary={}
 
 
-# In[45]:
+# In[139]:
 
-dateInput=raw_input(Enter a VALID date in MM-DD-YYYY format. Example: 01-31-2018\n")
+dateInput=raw_input("Enter a VALID date in MM-DD-YYYY format. Example: 01-31-2018\n")
 print(dateInput)
 month=int(dateInput.split("-")[0])
 date=int(dateInput.split("-")[1])
@@ -26,14 +30,14 @@ year=int(dateInput.split("-")[2])
 # print(year)
 
 
-# In[46]:
+# In[140]:
 
 page = requests.get("https://www.newswire.com/newsroom")    
 if page.status_code==200:   
     soup = BeautifulSoup(page.content, 'html.parser') 
 
 
-# In[47]:
+# In[141]:
 
 def monthToIntMonth(articleMonth):
     switcher = {
@@ -65,7 +69,7 @@ def getArticleData(soupArticle):
     locList=soupArticle.select("p strong.date-line.color-pr")[0].get_text().strip().lower().split(",")[:-2]
     location=[]
     for loc in locList:
-        loc=loc.encode('ascii').lstrip().rstrip()
+        loc=loc.lstrip().rstrip()
         location.append(loc)
     for loc in location:     
         if loc in locationDictionary.keys():
@@ -76,7 +80,7 @@ def getArticleData(soupArticle):
     catSoup=soupArticle.select("p[class=mb-0]")[0]
     catListLen=len(catSoup.select("a"))
     for i in range(0,catListLen):
-        catList=str(catSoup.select("a")[i].get_text().encode('ascii').lower()).split(",")
+        catList=str(catSoup.select("a")[i].get_text().encode('utf-8').lower()).split(",")
         for cat in catList:
             cat=cat.lstrip()
             if cat in categoryDictionary.keys():
@@ -88,7 +92,7 @@ def getArticleData(soupArticle):
     tagSoup=soupArticle.select("p[class=mb-0]")[1]
     tagListLen=len(tagSoup.select("a"))
     for i in range(0,tagListLen):
-        tagList=str(tagSoup.select("a")[i].get_text().encode('ascii').lower()).split(",")
+        tagList=str(tagSoup.select("a")[i].get_text().encode('utf-8').lower()).split(",")
         for tag in tagList:
             if tag in tagsDictionary.keys():
                 tagsDictionary[tag]+=1
@@ -96,7 +100,7 @@ def getArticleData(soupArticle):
                 tagsDictionary[tag]=1
 
 
-# In[48]:
+# In[142]:
 
 nextPageTraverse=True
 while(nextPageTraverse):
@@ -144,6 +148,43 @@ print "\n\n\n"
 print categoryDictionary
 print "\n\n\n"
 print tagsDictionary
+
+
+# In[143]:
+
+fig, ax = plt.subplots(figsize=(50,50))
+plt.bar(np.arange(len(locationDictionary)), locationDictionary.values(), align='center')
+plt.xticks(np.arange(len(locationDictionary)), locationDictionary.keys(),rotation='vertical', fontsize='12')
+plt.show()
+# plt.figure(figsize=(12,9))
+
+
+# In[134]:
+
+# y=[locationDictionary.keys()]
+# x=[locationDictionary.values()]
+# plt.scatter(y=y,x=range(len(x)),s=x)
+# plt.show()
+
+
+# In[ ]:
+
+# locDict1={}
+# for k,v in locationDictionary.iteritems():
+#     print "Before", type(k)
+#     k=k.encode('ascii','ignore')
+#     print "After", type(k)
+#     locDict1[k]=v
+# #     try:
+# #         k.encode("ascii")
+# #         locDict1[k]=v
+# #     except:
+# #         print "CAN'T"
+
+# rows=zip(locDict1.keys(),locDict1.values())
+# with open ("loc.csv",'wb') as az:
+#         writer=csv.writer(az)
+#         writer.writerows(rows)
 
 
 # In[ ]:
