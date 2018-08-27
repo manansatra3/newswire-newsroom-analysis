@@ -1,7 +1,9 @@
+#Requirements and how to run:
+#Have Python 2.x installed
+#Have python environment variable set up
+#to run open cmd/terminal in the directory where this file is located and enter the command (without the #):
+#python newsroomAnalysis.py
 
-# coding: utf-8
-
-# In[1]:
 
 ##Imports
 
@@ -12,16 +14,12 @@ import os
 from datetime import date as dateClass, timedelta
 
 
-# In[2]:
-
 ## Declaring dictionaries for storage of data
 
 locationDictionary={}
 categoryDictionary={}
 tagsDictionary={}
 
-
-# In[3]:
 
 #Date Calculations
 
@@ -51,7 +49,6 @@ while dateCorrect!=True:
             print "INVALID DATE entered. Try again..\n"
 
 
-# In[4]:
 
 #Making a request to the webpage and getting beautiful soup object
 
@@ -62,7 +59,6 @@ else:
     print "HTTP Request Rejected by: https://www.newswire.com/newsroom\tTry again later"
 
 
-# In[5]:
 
 #function to map months to month number
 def monthToIntMonth(articleMonth):
@@ -134,7 +130,6 @@ def getArticleData(soupArticle):
         pass
 
 
-# In[6]:
 
 #traversing articles using beautiful soup until the appropriate date
 nextPageTraverse=True
@@ -174,7 +169,6 @@ while(nextPageTraverse):
         nextPageTraverse=False
 
 
-# In[7]:
 
 #generating LocationAnalysis bar graph
 print "\n\nLocation Analysis Graph (LocationAnalysis.png) is save locally in your CWD: "+os.getcwd()
@@ -210,8 +204,6 @@ while printTable=="":
         printTable=""
 
 
-# In[8]:
-
 #Generate CategoryAnalysis bar graph
 print "\n\nCategory Analysis Graph (CategoryAnalysis.png) is save locally in your CWD: "+os.getcwd()
 fig, ax = plt.subplots(figsize=(50,25))
@@ -241,7 +233,6 @@ while printTable=="":
         printTable=""
 
 
-# In[9]:
 
 print "\n\nThe Tags are mostly unique for each article and thus plotting a bar graph wouldn't be feasible/readble. We thus only have a table for the same\n"
 
