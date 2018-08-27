@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[18]:
+# In[1]:
 
 ##Imports
 
@@ -12,7 +12,7 @@ import os
 from datetime import date as dateClass, timedelta
 
 
-# In[19]:
+# In[2]:
 
 ## Declaring dictionaries for storage of data
 
@@ -21,7 +21,7 @@ categoryDictionary={}
 tagsDictionary={}
 
 
-# In[20]:
+# In[3]:
 
 #Date Calculations
 
@@ -40,15 +40,18 @@ while dateCorrect!=True:
         month=int(dateInput.split("-")[0])
         date=int(dateInput.split("-")[1])
         year=int(dateInput.split("-")[2])
-        dateInput1=dateClass(year,month,date)
-        if (dateInput1 <= dateClass.today()):
-            dateCorrect=True
-            print "Starting to scrape newsroom data for analysis...."
-        else:
-            print "Date entered is after today's date. Enter today's date or past date"
+        try:
+            dateInput1=dateClass(year,month,date)
+            if (dateInput1 <= dateClass.today()):
+                dateCorrect=True
+                print "Starting to scrape newsroom data for analysis....\n"
+            else:
+                print "Date entered is after today's date. Enter today's date or past date\n"
+        except ValueError:
+            print "INVALID DATE entered. Try again..\n"
 
 
-# In[21]:
+# In[4]:
 
 #Making a request to the webpage and getting beautiful soup object
 
@@ -59,7 +62,7 @@ else:
     print "HTTP Request Rejected by: https://www.newswire.com/newsroom\tTry again later"
 
 
-# In[22]:
+# In[5]:
 
 #function to map months to month number
 def monthToIntMonth(articleMonth):
@@ -103,30 +106,35 @@ def getArticleData(soupArticle):
             locationDictionary[loc]=1
     
     #getting category data
-    catSoup=soupArticle.select("p[class=mb-0]")[0]
-    catListLen=len(catSoup.select("a"))
-    for i in range(0,catListLen):
-        catList=str(catSoup.select("a")[i].get_text().encode('utf-8').lower()).split(",")
-        for cat in catList:
-            cat=cat.lstrip()
-            if cat in categoryDictionary.keys():
-                categoryDictionary[cat]+=1
-            else:
-                categoryDictionary[cat]=1
-
+    try:
+        catSoup=soupArticle.select("p[class=mb-0]")[0]
+        catListLen=len(catSoup.select("a"))
+        for i in range(0,catListLen):
+            catList=str(catSoup.select("a")[i].get_text().encode('utf-8').lower()).split(",")
+            for cat in catList:
+                cat=cat.lstrip()
+                if cat in categoryDictionary.keys():
+                    categoryDictionary[cat]+=1
+                else:
+                    categoryDictionary[cat]=1
+    except IndexError:
+        pass
     #getting tag data
-    tagSoup=soupArticle.select("p[class=mb-0]")[1]
-    tagListLen=len(tagSoup.select("a"))
-    for i in range(0,tagListLen):
-        tagList=str(tagSoup.select("a")[i].get_text().encode('utf-8').lower()).split(",")
-        for tag in tagList:
-            if tag in tagsDictionary.keys():
-                tagsDictionary[tag]+=1
-            else:
-                tagsDictionary[tag]=1
+    try:
+        tagSoup=soupArticle.select("p[class=mb-0]")[1]
+        tagListLen=len(tagSoup.select("a"))
+        for i in range(0,tagListLen):
+            tagList=str(tagSoup.select("a")[i].get_text().encode('utf-8').lower()).split(",")
+            for tag in tagList:
+                if tag in tagsDictionary.keys():
+                    tagsDictionary[tag]+=1
+                else:
+                    tagsDictionary[tag]=1
+    except IndexError:
+        pass
 
 
-# In[23]:
+# In[6]:
 
 #traversing articles using beautiful soup until the appropriate date
 nextPageTraverse=True
@@ -166,73 +174,96 @@ while(nextPageTraverse):
         nextPageTraverse=False
 
 
-# In[24]:
-
-print "Location Analysis Graph is save locally in your CWD: "+os.getcwd()+"\LocationAnalysis.png"
-print "Printing the Location Analysis Table:\n"
+# In[7]:
 
 #generating LocationAnalysis bar graph
-fig, ax = plt.subplots(figsize=(35,12))
+print "\n\nLocation Analysis Graph (LocationAnalysis.png) is save locally in your CWD: "+os.getcwd()
+fig, ax = plt.subplots(figsize=(50,25))
 plt.bar(range(len(locationDictionary)), locationDictionary.values(), align='center')
 plt.xticks(range(len(locationDictionary)), locationDictionary.keys(),rotation='vertical', fontsize='12')
 plt.xlabel('Locations')
 plt.ylabel('Number of Articles')
 plt.savefig('LocationAnalysis.png')
 
-#generating location analysis frequency table
-locDict1={}
-maxLen=0
-for k,v in locationDictionary.iteritems():
-    k=k.encode('ascii','ignore')
-    locDict1[k]=v
-    if(maxLen<len(k)):
-        maxLen=len(k)
-    
-print "Location"+' '*(maxLen+2)+"| Number of Article"
-print '-'*(maxLen+32)
-for k,v in locDict1.iteritems():
-    print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
+printTable=""
+while printTable=="":
+    printTable=raw_input("\nDo you want to print the Location Analysis Table (Y/N)?: ")
+    if(printTable=='Y' or printTable=='y'):
+        #generating location analysis frequency table
+        locDict1={}
+        maxLen=0
+        for k,v in locationDictionary.iteritems():
+            k=k.encode('ascii','ignore')
+            locDict1[k]=v
+            if(maxLen<len(k)):
+                maxLen=len(k)
+
+        print "Location"+' '*(maxLen+2)+"| Number of Article"
+        print '-'*(maxLen+32)
+        for k,v in locDict1.iteritems():
+            print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
+        break
+    elif(printTable=='N' or printTable=='n'):
+        break
+    else:
+        print "\nInvalid Input try again"
+        printTable=""
 
 
-# In[25]:
+# In[8]:
 
-print "Category Analysis Graph is save locally in your CWD: "+os.getcwd()+"\CategoryAnalysis.png"
-print "Printing the Category Analysis Table:\n"
-
-fig, ax = plt.subplots(figsize=(35,12))
+#Generate CategoryAnalysis bar graph
+print "\n\nCategory Analysis Graph (CategoryAnalysis.png) is save locally in your CWD: "+os.getcwd()
+fig, ax = plt.subplots(figsize=(50,25))
 plt.bar(range(len(categoryDictionary)), categoryDictionary.values(), align='center')
 plt.xticks(range(len(categoryDictionary)), categoryDictionary.keys(),rotation='vertical', fontsize='12')
 plt.xlabel('Categories')
 plt.ylabel('Number of Articles')
 plt.savefig('CategoryAnalysis.png')
 
-maxLen=0
-for k,v in categoryDictionary.iteritems():
-#     k=k.encode('ascii','ignore')
-#     locDict1[k]=v
-    if(maxLen<len(k)):
-        maxLen=len(k)
+printTable=""
+while printTable=="":
+    printTable=raw_input("\Do you want to print the Category Analysis Table (Y/N)?: ")
+    if(printTable=='Y' or printTable=='y'):
+        maxLen=0
+        for k,v in categoryDictionary.iteritems():
+            if(maxLen<len(k)):
+                maxLen=len(k)
 
-print "Category"+' '*(maxLen+2)+"| Number of Article"
-print '-'*(maxLen+32)
-for k,v in categoryDictionary.iteritems():
-    print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
+        print "Category"+' '*(maxLen+2)+"| Number of Article"
+        print '-'*(maxLen+32)
+        for k,v in categoryDictionary.iteritems():
+            print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
+    elif(printTable=='N' or printTable=='n'):
+        break
+    else:
+        print "\nInvalid Input try again"
+        printTable=""
 
 
-# In[26]:
+# In[9]:
 
-print "The Tags are mostly unique for each article and thus plotting a bar graph wouldn't be feasible/readble. We thus only have a table for the same\n\n"
+print "\n\nThe Tags are mostly unique for each article and thus plotting a bar graph wouldn't be feasible/readble. We thus only have a table for the same\n"
 
-maxLen=0
-for k,v in tagsDictionary.iteritems():
-    if(maxLen<len(k)):
-        maxLen=len(k)
+printTable=""
+while printTable=="":
+    print "\nThe Tags frequency table WILL BE QUITE LONG. PLEASE WAIT UNTIL IT IS COMPLETELY PRINTED, if opted to.."
+    printTable=raw_input("\nDo you want to print the Tags Analysis Table (Y/N)?: ")
+    if(printTable=='Y' or printTable=='y'):
+        maxLen=0
+        for k,v in tagsDictionary.iteritems():
+            if(maxLen<len(k)):
+                maxLen=len(k)
 
-print "Tags"+' '*(maxLen+6)+"| Number of Article"
-print '-'*(maxLen+32)
-for k,v in tagsDictionary.iteritems():
-    print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
-    
-    
-print "Please DONT FORGET to take a look at the LocationAnalysis and CategoryAnalysis plots saved locally in your CWD: "+os.getcwd()
+        print "Tags"+' '*(maxLen+6)+"| Number of Article"
+        print '-'*(maxLen+32)
+        for k,v in tagsDictionary.iteritems():
+            print k+' '*(maxLen-len(k)+10)+"|"+' '*10+str(v)
+    elif(printTable=='N' or printTable=='n'):
+        break
+    else:
+        print "\nInvalid Input try again"
+        printTable=""
+
+print "\n\nPlease DONT FORGET to take a look at the LocationAnalysis and CategoryAnalysis plots saved locally in your CWD: "+os.getcwd()+"\n\n"
 
